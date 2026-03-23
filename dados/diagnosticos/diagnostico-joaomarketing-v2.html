@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de Perfil — @joaomarketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    background: #000000;
+    color: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ── PÁGINA ── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 32px;
+    page-break-after: always;
+    position: relative;
+    background: #000000;
+    overflow: hidden;
+  }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ── UTILITÁRIOS ── */
+  .label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #0ea5e9;
+  }
+  .metric-big {
+    font-size: 36px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .text-secondary { color: #94a3b8; font-size: 13px; }
+  .text-tertiary  { color: #64748b; font-size: 12px; }
+
+  .glass-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .glass-card-accent {
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .separator {
+    height: 1px;
+    background: rgba(255,255,255,0.05);
+    margin: 20px 0;
+  }
+
+  /* ── PILL SEMÁFORO ── */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .pill-good    { background: rgba(52,211,153,0.15); color: #34d399; }
+  .pill-warn    { background: rgba(245,158,11,0.15);  color: #f59e0b; }
+  .pill-crit    { background: rgba(239,68,68,0.15);   color: #ef4444; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { background: rgba(255,255,255,0.1); border-radius: 99px; height: 6px; width: 100%; margin-top: 8px; }
+  .progress-fill { height: 6px; border-radius: 99px; background: linear-gradient(90deg, #0ea5e9, #2563eb); }
+
+  /* ── SCORE CIRCLE ── */
+  .score-wrap { position: relative; width: 80px; height: 80px; }
+  .score-wrap svg { transform: rotate(-90deg); }
+  .score-text {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    text-align: center;
+  }
+  .score-num  { font-size: 20px; font-weight: 800; color: #fff; display: block; }
+  .score-max  { font-size: 9px; color: #64748b; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+  /* ── CAPA v3 ── */
+  .cover-page {
+    background: #0a0a0f !important;
+    padding: 44px 40px 36px !important;
+    display: flex;
+    flex-direction: column;
+  }
+  /* dot grid */
+  .cover-page::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    z-index: 0; pointer-events: none;
+  }
+  .cover-orb {
+    position: absolute; border-radius: 50%; pointer-events: none; z-index: 0;
+  }
+  .cover-orb-1 {
+    width: 360px; height: 320px; top: -80px; left: -60px;
+    background: radial-gradient(circle, rgba(14,165,233,0.22) 0%, transparent 70%);
+    filter: blur(120px);
+  }
+  .cover-orb-2 {
+    width: 300px; height: 300px; top: 30%; right: -60px;
+    background: radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%);
+    filter: blur(150px);
+  }
+  .cover-orb-3 {
+    width: 280px; height: 220px; bottom: -40px; left: 20%;
+    background: radial-gradient(circle, rgba(6,182,212,0.13) 0%, transparent 70%);
+    filter: blur(100px);
+  }
+  .cover-grad-overlay {
+    position: absolute; inset: 0; z-index: 0;
+    background: linear-gradient(180deg, rgba(14,165,233,0.04) 0%, transparent 40%, rgba(0,0,0,0.3) 100%);
+  }
+  .cover-z { position: relative; z-index: 1; }
+
+  /* topo */
+  .cv-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.28);
+    border-radius: 999px; padding: 6px 16px; width: fit-content;
+    box-shadow: 0 0 18px rgba(14,165,233,0.15);
+  }
+  .cv-badge-dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 8px rgba(52,211,153,0.8); }
+  .cv-badge-text { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #7dd3fc; }
+  .cv-title { font-size: 42px; font-weight: 800; line-height: 1.05; letter-spacing: -0.025em; color: #fff; text-shadow: 0 0 60px rgba(14,165,233,0.3); margin-top: 14px; }
+  .cv-subtitle { font-size: 14px; font-weight: 500; color: #64748b; margin-top: 8px; }
+
+  /* métricas */
+  .cv-metrics { flex: 1; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 28px 0; }
+  .cv-mcard {
+    flex: 1;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 28px 20px 24px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .cv-mcard::after {
+    content: ''; position: absolute; bottom: -1px; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(14,165,233,0.5), transparent);
+  }
+  .cv-micon {
+    font-family: 'Material Symbols Outlined'; font-size: 24px; color: #475569;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    margin-bottom: 18px;
+  }
+  .cv-mnum { font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; }
+  .cv-mlabel { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #475569; margin-top: 12px; }
+
+  /* score ring */
+  .cv-ring-wrap { position: relative; width: 120px; height: 120px; margin-bottom: 14px; }
+  .cv-ring-wrap svg { transform: rotate(-90deg); width: 120px; height: 120px; }
+  .cv-ring-num { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .cv-ring-num .rn { display: block; font-size: 36px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #f59e0b; }
+  .cv-ring-num .rx { display: block; font-size: 11px; color: #475569; margin-top: 2px; }
+
+  /* rodapé */
+  .cv-client-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: #334155; margin-bottom: 6px; }
+  .cv-username { font-size: 28px; font-weight: 800; color: #0ea5e9; letter-spacing: -0.02em; line-height: 1; text-shadow: 0 0 30px rgba(14,165,233,0.4); }
+  .cv-client-info { font-size: 13px; color: #94a3b8; margin-top: 6px; font-weight: 500; }
+  .cv-sep { height: 1px; background: rgba(255,255,255,0.05); margin: 20px 0 0; }
+  .cv-sig { padding-top: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .cv-sig-by { font-size: 12px; color: #334155; font-weight: 500; }
+  .cv-sig-by strong { color: #64748b; font-weight: 600; }
+  .cv-sig-date { font-size: 11px; color: #1e293b; text-align: right; line-height: 1.6; }
+
+  /* ── HEADER DE PÁGINA ── */
+  .page-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .page-num { font-size: 10px; color: #64748b; font-weight: 600; }
+
+  /* ── METRIC CARD ── */
+  .metric-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .metric-icon { font-size: 18px; margin-bottom: 4px; }
+
+  /* ── TABELA ── */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    text-align: left; padding: 10px 12px;
+    background: rgba(255,255,255,0.04);
+    color: #0ea5e9; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #94a3b8; }
+  tr:last-child td { border-bottom: none; }
+  td.td-white { color: #fff; font-weight: 600; }
+
+  /* ── GANCHO CARD ── */
+  .hook-card {
+    background: rgba(14,165,233,0.06);
+    border: 1px solid rgba(14,165,233,0.15);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .hook-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #0ea5e9; margin-bottom: 4px; }
+  .hook-text { font-size: 13px; font-weight: 600; color: #fff; }
+
+  /* ── FUNIL ── */
+  .funnel-step {
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 6px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .funnel-step-label { font-size: 12px; font-weight: 600; }
+  .funnel-step-val   { font-size: 20px; font-weight: 800; }
+
+  /* ── ROTEIRO ── */
+  .reel-act {
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .reel-act-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; }
+  .reel-act-text  { font-size: 13px; color: #e2e8f0; line-height: 1.5; }
+  .reel-act-time  { font-size: 10px; color: #64748b; margin-top: 4px; }
+
+  /* ── CALENDÁRIO ── */
+  .cal-week { margin-bottom: 16px; }
+  .cal-week-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #0ea5e9; margin-bottom: 8px; }
+  .cal-day {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border-left: 2px solid rgba(14,165,233,0.3);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+  .cal-day-name { color: #64748b; width: 60px; flex-shrink: 0; font-weight: 600; }
+  .cal-day-content { color: #e2e8f0; }
+  .cal-day-cta { color: #0ea5e9; font-weight: 700; font-size: 11px; margin-top: 2px; }
+
+  /* ── UPSELL ── */
+  .upsell-card {
+    background: linear-gradient(135deg, rgba(14,165,233,0.1), rgba(37,99,235,0.1));
+    border: 1px solid rgba(14,165,233,0.25);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+  .upsell-price { font-size: 36px; font-weight: 800; color: #0ea5e9; }
+  .upsell-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: #fff; font-weight: 700; font-size: 13px;
+    padding: 12px 32px; border-radius: 999px;
+    margin-top: 16px; text-decoration: none;
+    box-shadow: 0 8px 24px rgba(14,165,233,0.3);
+  }
+
+  /* ── ANTES/DEPOIS ── */
+  .bio-before {
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 12px; padding: 14px; font-size: 13px; color: #fca5a5;
+  }
+  .bio-after {
+    background: rgba(52,211,153,0.06);
+    border: 1px solid rgba(52,211,153,0.15);
+    border-radius: 12px; padding: 14px; font-size: 13px; color: #6ee7b7;
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 1 — CAPA v3
+════════════════════════════════════════════════ -->
+<div class="page cover-page">
+  <!-- fundo -->
+  <div class="cover-orb cover-orb-1"></div>
+  <div class="cover-orb cover-orb-2"></div>
+  <div class="cover-orb cover-orb-3"></div>
+  <div class="cover-grad-overlay"></div>
+
+  <!-- TOPO (20%) -->
+  <div class="cover-z" style="flex:0 0 auto;">
+    <div class="cv-badge">
+      <span class="cv-badge-dot"></span>
+      <span class="cv-badge-text">Diagnóstico de Perfil</span>
+    </div>
+    <div class="cv-title">Relatório de<br>Análise de Perfil</div>
+    <div class="cv-subtitle">Instagram &nbsp;·&nbsp; Análise Completa</div>
+  </div>
+
+  <!-- MEIO (50%) — MÉTRICAS PROTAGONISTAS -->
+  <div class="cv-metrics cover-z">
+
+    <!-- Seguidores -->
+    <div class="cv-mcard">
+      <span class="cv-micon">groups</span>
+      <div class="cv-mnum" style="color:#ffffff;">15k</div>
+      <div class="cv-mlabel">Seguidores</div>
+    </div>
+
+    <!-- Engajamento -->
+    <div class="cv-mcard">
+      <span class="cv-micon">trending_up</span>
+      <div class="cv-mnum" style="color:#0ea5e9;">3.2%</div>
+      <div class="cv-mlabel">Engajamento</div>
+    </div>
+
+    <!-- Score com circle progress -->
+    <!-- r=54 → C=339.3 | 72% → dash=244.3 offset=95 -->
+    <div class="cv-mcard">
+      <span class="cv-micon">speed</span>
+      <div class="cv-ring-wrap">
+        <svg viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" fill="none"
+            stroke="rgba(255,255,255,0.07)" stroke-width="8"/>
+          <circle cx="60" cy="60" r="54" fill="none"
+            stroke="#f59e0b" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="339.3" stroke-dashoffset="95.0"/>
+        </svg>
+        <div class="cv-ring-num">
+          <span class="rn">72</span>
+          <span class="rx">/100</span>
+        </div>
+      </div>
+      <div class="cv-mlabel">Score Geral</div>
+    </div>
+
+  </div>
+
+  <!-- RODAPÉ (30%) -->
+  <div class="cover-z" style="flex:0 0 auto;">
+    <div style="padding-bottom:20px;">
+      <div class="cv-client-label">Cliente</div>
+      <div class="cv-username">@joaomarketing</div>
+      <div class="cv-client-info">João Silva &nbsp;·&nbsp; Marketing Digital</div>
+    </div>
+    <div class="cv-sep"></div>
+    <div class="cv-sig">
+      <div class="cv-sig-by">Por <strong>Matheus Soares</strong> · @omatheus.ai</div>
+      <div class="cv-sig-date">
+        19 de março de 2026<br>
+        <span style="color:#1e293b;">Versão 3.0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 2 — SUMÁRIO EXECUTIVO
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Sumário Executivo</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Visão Geral do Perfil</div>
+    </div>
+    <div class="page-num">02 / 13</div>
+  </div>
+
+  <!-- Texto do Matheus -->
+  <div class="glass-card" style="margin-bottom:20px;">
+    <p style="font-size:13px; color:#e2e8f0; line-height:1.7; margin-bottom:12px;">
+      João, olha só o que eu encontrei aqui. Tu tem um perfil com potencial real, mas tá
+      deixando dinheiro na mesa por uns erros que são fáceis de corrigir. O problema não é
+      conteúdo — tu posta bastante. O problema é que tu posta <em>sem estratégia</em>, e
+      o Instagram castiga isso na distribuição.
+    </p>
+    <p style="font-size:13px; color:#e2e8f0; line-height:1.7; margin-bottom:12px;">
+      A boa notícia: com as mudanças que vou mostrar aqui, dá pra dobrar o teu alcance
+      em 4 semanas sem postar mais nada a mais. É ajuste de mix, gancho e CTA. Simples assim.
+    </p>
+    <p style="font-size:13px; color:#94a3b8; line-height:1.7;">
+      Vi que tu posta muito sobre estratégia de tráfego pago — isso é massa, porque é
+      um nicho com audiência qualificada. Mas tu precisa equilibrar com conteúdo de
+      atração (educativo/viral) pra trazer gente nova pro funil.
+    </p>
+  </div>
+
+  <!-- Métricas-chave -->
+  <div class="label" style="margin-bottom:12px;">Métricas-Chave</div>
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="metric-card">
+      <div class="metric-icon">👥</div>
+      <div class="label">Seguidores</div>
+      <div class="metric-big">15.2k</div>
+      <div class="text-secondary">+340 últimos 30 dias</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">💬</div>
+      <div class="label">Engajamento</div>
+      <div class="metric-big" style="color:#34d399;">3.2%</div>
+      <div class="text-secondary">Média do nicho: 2.1%</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">📊</div>
+      <div class="label">Alcance Médio</div>
+      <div class="metric-big" style="color:#0ea5e9;">8.4k</div>
+      <div class="text-secondary">por publicação</div>
+    </div>
+  </div>
+
+  <!-- Semáforo geral -->
+  <div class="label" style="margin-bottom:12px;">Diagnóstico por Área</div>
+  <div class="glass-card">
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:13px; color:#e2e8f0;">Bio e Posicionamento</span>
+        <span class="pill pill-warn">🟡 Atenção</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:13px; color:#e2e8f0;">Mix de Conteúdo</span>
+        <span class="pill pill-crit">🔴 Crítico</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:13px; color:#e2e8f0;">Qualidade dos Ganchos</span>
+        <span class="pill pill-warn">🟡 Atenção</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:13px; color:#e2e8f0;">Engajamento</span>
+        <span class="pill pill-good">🟢 Bom</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:13px; color:#e2e8f0;">Funil de Vendas</span>
+        <span class="pill pill-crit">🔴 Crítico</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 3 — RAIO-X DA BIO
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 3</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Raio-X da Bio</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div class="score-wrap">
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#0ea5e9" stroke-width="8"
+                  stroke-dasharray="213.6" stroke-dashoffset="85.4" stroke-linecap="round"/>
+        </svg>
+        <div class="score-text">
+          <span class="score-num">60</span>
+          <span class="score-max">/100</span>
+        </div>
+      </div>
+      <div class="page-num">03 / 13</div>
+    </div>
+  </div>
+
+  <div class="label" style="margin-bottom:10px;">Bio Atual</div>
+  <div class="bio-before" style="margin-bottom:16px;">
+    Ajudo pessoas a crescer no Instagram<br>
+    📈 Marketing Digital<br>
+    🎯 Estratégias de Tráfego<br>
+    👇 Clica no link
+  </div>
+
+  <div class="label" style="margin-bottom:10px;">Análise Ponto a Ponto</div>
+  <div class="glass-card" style="margin-bottom:16px;">
+    <table>
+      <tr>
+        <th>Linha</th><th>Texto Atual</th><th>Problema</th><th>Status</th>
+      </tr>
+      <tr>
+        <td class="td-white">1ª</td>
+        <td>"Ajudo pessoas a crescer..."</td>
+        <td>Genérico. Todo mundo diz isso.</td>
+        <td><span class="pill pill-crit" style="font-size:10px;">🔴</span></td>
+      </tr>
+      <tr>
+        <td class="td-white">2ª</td>
+        <td>"Marketing Digital"</td>
+        <td>Categoria muito ampla, sem diferencial.</td>
+        <td><span class="pill pill-warn" style="font-size:10px;">🟡</span></td>
+      </tr>
+      <tr>
+        <td class="td-white">3ª</td>
+        <td>"Estratégias de Tráfego"</td>
+        <td>Bom, mas falta prova social.</td>
+        <td><span class="pill pill-warn" style="font-size:10px;">🟡</span></td>
+      </tr>
+      <tr>
+        <td class="td-white">4ª</td>
+        <td>"Clica no link"</td>
+        <td>CTA fraco. Não diz o que tem no link.</td>
+        <td><span class="pill pill-crit" style="font-size:10px;">🔴</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="label" style="margin-bottom:10px;">3 Versões Sugeridas</div>
+
+  <div class="glass-card glass-card-accent" style="margin-bottom:8px;">
+    <div class="label" style="margin-bottom:6px; color:#34d399;">Versão 1 — Autoridade + Nicho</div>
+    <div class="bio-after" style="font-size:12px;">
+      João Silva | Tráfego Pago<br>
+      Reduzi o CPL de 12 clientes em +40% com Meta Ads<br>
+      🎯 Estratégias que o guru não vai te contar<br>
+      👇 Acessa meu método gratuito aqui
+    </div>
+  </div>
+
+  <div class="glass-card glass-card-accent" style="margin-bottom:8px;">
+    <div class="label" style="margin-bottom:6px; color:#34d399;">Versão 2 — Resultado + Público</div>
+    <div class="bio-after" style="font-size:12px;">
+      João Silva · Ads para Infoprodutores<br>
+      Já gerenciei +R$2M em verba de tráfego pago<br>
+      📊 Toda semana: análise de campanha real<br>
+      ▶ Testa meu método (grátis) 👇
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 4 — MIX DE CONTEÚDO
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 4</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Análise do Mix de Conteúdo</div>
+    </div>
+    <div class="page-num">04 / 13</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:20px;">
+    <!-- Mix Atual -->
+    <div>
+      <div class="label" style="margin-bottom:14px;">Mix Atual</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Educativo / Tráfego</span>
+            <span style="font-size:12px; font-weight:700; color:#0ea5e9;">60%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:60%;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Pessoal</span>
+            <span style="font-size:12px; font-weight:700; color:#94a3b8;">20%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:20%; background:linear-gradient(90deg,#94a3b8,#64748b);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Venda Direta</span>
+            <span style="font-size:12px; font-weight:700; color:#f59e0b;">10%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:10%; background:linear-gradient(90deg,#f59e0b,#d97706);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Viral / Trend</span>
+            <span style="font-size:12px; font-weight:700; color:#ef4444;">10%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:10%; background:linear-gradient(90deg,#ef4444,#dc2626);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mix Ideal -->
+    <div>
+      <div class="label" style="margin-bottom:14px; color:#34d399;">Mix Ideal Recomendado</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Educativo / Tráfego</span>
+            <span style="font-size:12px; font-weight:700; color:#0ea5e9;">40%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:40%;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Viral / Atração</span>
+            <span style="font-size:12px; font-weight:700; color:#34d399;">30%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:30%; background:linear-gradient(90deg,#34d399,#10b981);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Prova Social / Cases</span>
+            <span style="font-size:12px; font-weight:700; color:#f59e0b;">20%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:20%; background:linear-gradient(90deg,#f59e0b,#d97706);"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-size:12px; color:#e2e8f0;">Pessoal / Bastidores</span>
+            <span style="font-size:12px; font-weight:700; color:#94a3b8;">10%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:10%; background:linear-gradient(90deg,#94a3b8,#64748b);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabela comparativa -->
+  <div class="label" style="margin-bottom:12px;">Diagnóstico Detalhado</div>
+  <div class="glass-card" style="padding:0; overflow:hidden;">
+    <table>
+      <tr>
+        <th>Categoria</th><th>Atual</th><th>Meta</th><th>Alcance Médio</th><th>Ação</th>
+      </tr>
+      <tr>
+        <td class="td-white">Educativo</td><td>60%</td><td>40%</td><td>12k</td>
+        <td><span class="pill pill-warn" style="font-size:10px;">Reduzir</span></td>
+      </tr>
+      <tr>
+        <td class="td-white">Viral / Atração</td><td>10%</td><td>30%</td><td>35k</td>
+        <td><span class="pill pill-crit" style="font-size:10px;">Aumentar urgente</span></td>
+      </tr>
+      <tr>
+        <td class="td-white">Prova Social</td><td>0%</td><td>20%</td><td>18k</td>
+        <td><span class="pill pill-crit" style="font-size:10px;">Criar agora</span></td>
+      </tr>
+      <tr>
+        <td class="td-white">Pessoal</td><td>20%</td><td>10%</td><td>8k</td>
+        <td><span class="pill pill-warn" style="font-size:10px;">Reduzir</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="glass-card" style="margin-top:16px; background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.15);">
+    <div class="label" style="color:#ef4444; margin-bottom:8px;">⚠ Problema Crítico Identificado</div>
+    <p style="font-size:12px; color:#fca5a5; line-height:1.6;">
+      Tu não tem nenhum post de prova social. Nenhum case, nenhum resultado de cliente,
+      nenhum "antes e depois". Pra vender serviço de tráfego, isso é fatal.
+      A primeira ação da semana 1 é criar esse conteúdo.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 5 — TOP POSTS
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 5</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Top 5 Posts — Performance</div>
+    </div>
+    <div class="page-num">05 / 13</div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+
+    <!-- Post 1 — melhor -->
+    <div class="glass-card" style="border-color:rgba(14,165,233,0.3); border-left:4px solid #0ea5e9; padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="label" style="color:#f59e0b; margin-bottom:4px;">🏆 Melhor Post</div>
+          <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:4px;">
+            "5 métricas que todo gestor de tráfego ignora (e que custam dinheiro)"
+          </div>
+          <div class="text-secondary">Carrossel · Categoria: Educativo</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:22px; font-weight:800; color:#0ea5e9;">4.8%</div>
+          <div class="text-tertiary">engajamento</div>
+        </div>
+      </div>
+      <div class="separator" style="margin:10px 0;"></div>
+      <div class="grid-4">
+        <div style="text-align:center;"><div style="font-weight:700;color:#fff;">28.4k</div><div class="text-tertiary">alcance</div></div>
+        <div style="text-align:center;"><div style="font-weight:700;color:#34d399;">312</div><div class="text-tertiary">salv.</div></div>
+        <div style="text-align:center;"><div style="font-weight:700;color:#f59e0b;">87</div><div class="text-tertiary">coment.</div></div>
+        <div style="text-align:center;"><div style="font-weight:700;color:#94a3b8;">1.2k</div><div class="text-tertiary">curtidas</div></div>
+      </div>
+    </div>
+
+    <!-- Posts 2-5 -->
+    <div class="glass-card" style="padding:12px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:12px; font-weight:600; color:#fff;">"Como eu reduzi o CPL em 43% mudando só o criativo"</div>
+          <div class="text-tertiary">Reel · Prova Social</div>
+        </div>
+        <div style="text-align:right;"><div style="font-size:16px; font-weight:800; color:#34d399;">3.9%</div><div class="text-tertiary">21.2k alcance</div></div>
+      </div>
+    </div>
+    <div class="glass-card" style="padding:12px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:12px; font-weight:600; color:#fff;">"Erro que faz sua campanha morrer no 3º dia"</div>
+          <div class="text-tertiary">Reel · Educativo</div>
+        </div>
+        <div style="text-align:right;"><div style="font-size:16px; font-weight:800; color:#f59e0b;">3.1%</div><div class="text-tertiary">18.7k alcance</div></div>
+      </div>
+    </div>
+    <div class="glass-card" style="padding:12px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:12px; font-weight:600; color:#fff;">"O que faz um anúncio ter 0.5% de CTR vs 3%"</div>
+          <div class="text-tertiary">Carrossel · Educativo</div>
+        </div>
+        <div style="text-align:right;"><div style="font-size:16px; font-weight:800; color:#f59e0b;">2.8%</div><div class="text-tertiary">15.1k alcance</div></div>
+      </div>
+    </div>
+    <div class="glass-card" style="padding:12px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-size:12px; font-weight:600; color:#fff;">"Bastidores: minha rotina de gestor de tráfego"</div>
+          <div class="text-tertiary">Reel · Pessoal</div>
+        </div>
+        <div style="text-align:right;"><div style="font-size:16px; font-weight:800; color:#94a3b8;">1.9%</div><div class="text-tertiary">9.3k alcance</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card" style="background:rgba(52,211,153,0.05); border-color:rgba(52,211,153,0.15);">
+    <div class="label" style="color:#34d399; margin-bottom:8px;">💡 Insight do Pulo do Gato</div>
+    <p style="font-size:12px; color:#a7f3d0; line-height:1.6;">
+      Os 2 melhores posts têm uma coisa em comum: gancho com número concreto
+      ("5 métricas", "43%"). Número específico = credibilidade instantânea.
+      Aplica isso em TODOS os próximos ganchos.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 6 — DIAGNÓSTICO DOS GANCHOS
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 6</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Diagnóstico dos Ganchos</div>
+    </div>
+    <div class="page-num">06 / 13</div>
+  </div>
+
+  <div class="label" style="margin-bottom:12px;">Análise dos Últimos 10 Posts</div>
+  <div class="glass-card" style="padding:0; overflow:hidden; margin-bottom:20px;">
+    <table>
+      <tr><th>Gancho Usado</th><th>Padrão</th><th>Gatilho</th><th>Alcance</th></tr>
+      <tr>
+        <td>"5 métricas que gestores ignoram"</td>
+        <td class="td-white">P1</td>
+        <td><span style="color:#0ea5e9;">Curiosidade</span></td>
+        <td class="td-white">28.4k</td>
+      </tr>
+      <tr>
+        <td>"Como eu reduzi o CPL em 43%"</td>
+        <td class="td-white">P1</td>
+        <td><span style="color:#34d399;">Identificação</span></td>
+        <td class="td-white">21.2k</td>
+      </tr>
+      <tr>
+        <td>"Erro que faz sua campanha morrer"</td>
+        <td class="td-white">P2</td>
+        <td><span style="color:#ef4444;">Medo/Urgência</span></td>
+        <td class="td-white">18.7k</td>
+      </tr>
+      <tr>
+        <td>"Aprendi muito sobre tráfego..."</td>
+        <td><span style="color:#64748b;">Nenhum</span></td>
+        <td><span style="color:#64748b;">—</span></td>
+        <td style="color:#ef4444;">4.1k</td>
+      </tr>
+      <tr>
+        <td>"Dicas de Meta Ads para iniciantes"</td>
+        <td><span style="color:#64748b;">Nenhum</span></td>
+        <td><span style="color:#64748b;">—</span></td>
+        <td style="color:#ef4444;">3.8k</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="label" style="margin-bottom:12px;">3 Padrões Validados — Aplica Agora</div>
+
+  <div class="hook-card">
+    <div class="hook-label">P1 — Identificação + Revelação · Melhor performance</div>
+    <div class="hook-text">"Se tu gasta mais de R$5k/mês em tráfego e o CPL não para de subir, esse erro aqui é o culpado."</div>
+  </div>
+  <div class="hook-card">
+    <div class="hook-label">P2 — Provocação + Afirmação Polêmica</div>
+    <div class="hook-text">"Gestor de tráfego que não testa criativo novo toda semana não é gestor — é apostador."</div>
+  </div>
+  <div class="hook-card">
+    <div class="hook-label">P3 — Revelação com Número Concreto</div>
+    <div class="hook-text">"Analisei 47 campanhas no Meta e 80% das que morreram tinham esse problema em comum."</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 7 — DIAGNÓSTICO DO FUNIL
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 7</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Diagnóstico do Funil</div>
+    </div>
+    <div class="page-num">07 / 13</div>
+  </div>
+
+  <div class="grid-2" style="gap:20px;">
+    <!-- Funil atual -->
+    <div>
+      <div class="label" style="margin-bottom:14px; color:#ef4444;">Funil Atual — Com Vazamentos</div>
+      <div class="funnel-step" style="background:rgba(14,165,233,0.1); border:1px solid rgba(14,165,233,0.2);">
+        <span class="funnel-step-label">Alcance</span>
+        <span class="funnel-step-val">8.400</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#ef4444; margin:2px 0;">⚠ 95% não vira seguidor</div>
+      <div class="funnel-step" style="background:rgba(14,165,233,0.07); border:1px solid rgba(14,165,233,0.15);">
+        <span class="funnel-step-label">Visita no Perfil</span>
+        <span class="funnel-step-val">420</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#ef4444; margin:2px 0;">⚠ Bio fraca, não converte</div>
+      <div class="funnel-step" style="background:rgba(14,165,233,0.05); border:1px solid rgba(14,165,233,0.1);">
+        <span class="funnel-step-label">Seguidores Novos</span>
+        <span class="funnel-step-val">11</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#ef4444; margin:2px 0;">⚠ Sem CTA pro link</div>
+      <div class="funnel-step" style="background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.15);">
+        <span class="funnel-step-label" style="color:#ef4444;">Cliques no Link</span>
+        <span class="funnel-step-val" style="color:#ef4444;">2</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#64748b; margin:2px 0;">Conversão: 0%</div>
+      <div class="funnel-step" style="background:rgba(239,68,68,0.03); border:1px solid rgba(239,68,68,0.1);">
+        <span class="funnel-step-label" style="color:#64748b;">Vendas</span>
+        <span class="funnel-step-val" style="color:#64748b;">0</span>
+      </div>
+    </div>
+
+    <!-- Funil otimizado -->
+    <div>
+      <div class="label" style="margin-bottom:14px; color:#34d399;">Funil Otimizado — Projeção</div>
+      <div class="funnel-step" style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.2);">
+        <span class="funnel-step-label">Alcance</span>
+        <span class="funnel-step-val" style="color:#34d399;">22.000</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#34d399; margin:2px 0;">✓ Mix ajustado + ganchos P1/P2</div>
+      <div class="funnel-step" style="background:rgba(52,211,153,0.07); border:1px solid rgba(52,211,153,0.15);">
+        <span class="funnel-step-label">Visita no Perfil</span>
+        <span class="funnel-step-val" style="color:#34d399;">1.800</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#34d399; margin:2px 0;">✓ Bio com proposta clara</div>
+      <div class="funnel-step" style="background:rgba(52,211,153,0.05); border:1px solid rgba(52,211,153,0.1);">
+        <span class="funnel-step-label">Seguidores Novos</span>
+        <span class="funnel-step-val" style="color:#34d399;">90</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#34d399; margin:2px 0;">✓ CTA nos Stories diários</div>
+      <div class="funnel-step" style="background:rgba(52,211,153,0.04); border:1px solid rgba(52,211,153,0.1);">
+        <span class="funnel-step-label">Cliques no Link</span>
+        <span class="funnel-step-val" style="color:#f59e0b;">45</span>
+      </div>
+      <div style="text-align:center; font-size:11px; color:#34d399; margin:2px 0;">✓ Lead magnet gratuito</div>
+      <div class="funnel-step" style="background:rgba(52,211,153,0.03); border:1px solid rgba(52,211,153,0.1);">
+        <span class="funnel-step-label">Vendas/mês</span>
+        <span class="funnel-step-val" style="color:#0ea5e9;">3-5</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINAS 8-9 — PLANO DE AÇÃO
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Páginas 8-9</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Plano de Ação — 4 Semanas</div>
+    </div>
+    <div class="page-num">08 / 13</div>
+  </div>
+
+  <div class="cal-week">
+    <div class="cal-week-title">Semana 1 — Fundação (Prioridade Máxima)</div>
+    <div class="cal-day">
+      <div class="cal-day-name">Seg</div>
+      <div><div class="cal-day-content">Atualizar bio (versão 1 ou 2) + novo link na bio</div><div class="cal-day-cta">↳ Ação imediata, zero custo</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Ter</div>
+      <div><div class="cal-day-content">Reel: "Case real — cliente X reduziu CPL em Y%" (prova social)</div><div class="cal-day-cta">↳ Gancho P1 · Categoria: Prova Social</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Qui</div>
+      <div><div class="cal-day-content">Carrossel: "5 perguntas pra fazer antes de rodar qualquer anúncio"</div><div class="cal-day-cta">↳ Gancho P3 com número · Educativo</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Sáb</div>
+      <div><div class="cal-day-content">Stories: bastidores do trabalho + CTA pro link da bio</div><div class="cal-day-cta">↳ Humanização · 3 stories</div></div>
+    </div>
+  </div>
+
+  <div class="cal-week">
+    <div class="cal-week-title">Semana 2 — Atração</div>
+    <div class="cal-day">
+      <div class="cal-day-name">Ter</div>
+      <div><div class="cal-day-content">Reel viral: "Esse erro de tráfego te custou dinheiro essa semana (sem tu saber)"</div><div class="cal-day-cta">↳ Gancho P2 · Medo/Urgência · Alta viralidade</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Qui</div>
+      <div><div class="cal-day-content">Carrossel comparativo: "Anúncio amador vs. anúncio de gestor profissional"</div><div class="cal-day-cta">↳ Formato Isso vs. Aquilo · Educativo</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Sáb</div>
+      <div><div class="cal-day-content">Live rápida (15min): "Análise de campanha ao vivo"</div><div class="cal-day-cta">↳ Autoridade + engajamento direto</div></div>
+    </div>
+  </div>
+
+  <div class="cal-week">
+    <div class="cal-week-title">Semana 3 — Conversão</div>
+    <div class="cal-day">
+      <div class="cal-day-name">Ter</div>
+      <div><div class="cal-day-content">Reel: "Como seria sua campanha com um gestor dedicado" (CTA serviço)</div><div class="cal-day-cta">↳ Gancho P1 · Fundo de funil</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Qui</div>
+      <div><div class="cal-day-content">Carrossel: "Diagnóstico gratuito de campanha — como funciona"</div><div class="cal-day-cta">↳ Lead magnet · Entrada no funil</div></div>
+    </div>
+  </div>
+
+  <div class="cal-week">
+    <div class="cal-week-title">Semana 4 — Avaliação e Ajuste</div>
+    <div class="cal-day">
+      <div class="cal-day-name">Qua</div>
+      <div><div class="cal-day-content">Análise dos dados: o que funcionou, o que não funcionou</div><div class="cal-day-cta">↳ Ajustar mix pra semana 5</div></div>
+    </div>
+    <div class="cal-day">
+      <div class="cal-day-name">Sex</div>
+      <div><div class="cal-day-content">Reel de resultado: "Depois de 30 dias aplicando isso, olha o que mudou"</div><div class="cal-day-cta">↳ Prova social em tempo real</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 10 — ROTEIROS PRONTOS
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 10</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Roteiros Prontos — 2 Reels de 60s</div>
+    </div>
+    <div class="page-num">10 / 13</div>
+  </div>
+
+  <div class="label" style="margin-bottom:12px;">Reel 1 — Prova Social (Semana 1)</div>
+
+  <div class="reel-act" style="background:rgba(14,165,233,0.08); border:1px solid rgba(14,165,233,0.15);">
+    <div class="reel-act-label" style="color:#0ea5e9;">🎯 Gancho · 0-5s</div>
+    <div class="reel-act-text">"Meu cliente gastava R$8k/mês em Meta Ads e não conseguia escalar. Mudei uma coisa. CPL caiu 43% em 2 semanas."</div>
+    <div class="reel-act-time">Câmera na cara, direto, sem introdução.</div>
+  </div>
+  <div class="reel-act" style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.12);">
+    <div class="reel-act-label" style="color:#f59e0b;">⚡ Tensão · 5-20s</div>
+    <div class="reel-act-text">"O problema não era o orçamento, não era o público. Era o criativo. Ele tava rodando o mesmo anúncio há 3 meses. O Meta castiga isso — a relevância cai, o CPM sobe, tu gasta mais pra alcançar menos."</div>
+  </div>
+  <div class="reel-act" style="background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.12);">
+    <div class="reel-act-label" style="color:#34d399;">💡 Virada · 20-50s</div>
+    <div class="reel-act-text">"A solução foi simples: trocar o criativo toda semana, 3 variações por conjunto de anúncio. Deixa o algoritmo descobrir qual converte mais. Em 14 dias, o CPL saiu de R$47 pra R$27. Mesmo público, mesmo orçamento."</div>
+  </div>
+  <div class="reel-act" style="background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2);">
+    <div class="reel-act-label" style="color:#60a5fa;">📣 CTA · 50-60s</div>
+    <div class="reel-act-text">"Se tu quer um diagnóstico gratuito da tua campanha, deixa 'DIAGNÓSTICO' nos comentários que eu te mando o formulário."</div>
+  </div>
+
+  <div class="separator"></div>
+
+  <div class="label" style="margin-bottom:12px;">Reel 2 — Educativo Viral (Semana 2)</div>
+
+  <div class="reel-act" style="background:rgba(14,165,233,0.08); border:1px solid rgba(14,165,233,0.15);">
+    <div class="reel-act-label" style="color:#0ea5e9;">🎯 Gancho · 0-5s</div>
+    <div class="reel-act-text">"Tu perdeu dinheiro em tráfego essa semana e nem sabe por quê. Deixa eu te mostrar."</div>
+  </div>
+  <div class="reel-act" style="background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.12);">
+    <div class="reel-act-label" style="color:#f59e0b;">⚡ Tensão · 5-20s</div>
+    <div class="reel-act-text">"A maioria dos gestores olha só pra CTR e CPL. Mas tem uma métrica que ninguém fala que é o sinal mais claro de que a campanha vai morrer: a frequência. Quando passa de 3.5, tu tá pagando pra irritar a mesma pessoa."</div>
+  </div>
+  <div class="reel-act" style="background:rgba(52,211,153,0.06); border:1px solid rgba(52,211,153,0.12);">
+    <div class="reel-act-label" style="color:#34d399;">💡 Virada · 20-50s</div>
+    <div class="reel-act-text">"Quando a frequência passa de 3.5 num conjunto: pausa, troca o criativo, ou expande o público. Nunca deixa rodar. Fiz isso em 12 contas no último trimestre e economizei em média 31% do orçamento que tava sendo desperdiçado."</div>
+  </div>
+  <div class="reel-act" style="background:rgba(37,99,235,0.08); border:1px solid rgba(37,99,235,0.2);">
+    <div class="reel-act-label" style="color:#60a5fa;">📣 CTA · 50-60s</div>
+    <div class="reel-act-text">"Salva esse vídeo pra lembrar. E se tu quer aprender a otimizar campanha na prática, comenta 'MÉTODO' que eu te mando o material."</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 11 — PRÓXIMOS PASSOS
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 11</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Próximos Passos</div>
+    </div>
+    <div class="page-num">11 / 13</div>
+  </div>
+
+  <div class="label" style="margin-bottom:14px;">3 Ações Pra Fazer HOJE</div>
+
+  <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:24px;">
+    <div class="glass-card glass-card-accent" style="display:flex; gap:16px; align-items:flex-start; padding:16px;">
+      <div style="font-size:24px; font-weight:800; color:#0ea5e9; flex-shrink:0;">01</div>
+      <div>
+        <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">Atualiza a bio agora</div>
+        <div class="text-secondary">Cola a versão 1 ou 2 da página 3. Leva 5 minutos e já vai melhorar a conversão de visita→seguidor.</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card-accent" style="display:flex; gap:16px; align-items:flex-start; padding:16px;">
+      <div style="font-size:24px; font-weight:800; color:#0ea5e9; flex-shrink:0;">02</div>
+      <div>
+        <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">Grava o Reel 1 essa semana</div>
+        <div class="text-secondary">O roteiro tá pronto na página 10. Só precisa de câmera e 20 minutos. Prova social é o que mais falta no teu perfil.</div>
+      </div>
+    </div>
+    <div class="glass-card glass-card-accent" style="display:flex; gap:16px; align-items:flex-start; padding:16px;">
+      <div style="font-size:24px; font-weight:800; color:#0ea5e9; flex-shrink:0;">03</div>
+      <div>
+        <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:4px;">Cria um lead magnet simples</div>
+        <div class="text-secondary">Um checklist de "5 métricas pra acompanhar toda semana no Meta Ads". Coloca no link da bio. Em PDF, Google Doc, qualquer coisa.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upsell -->
+  <div class="upsell-card">
+    <div class="label" style="margin-bottom:8px;">Quer ir além?</div>
+    <div style="font-size:16px; font-weight:700; color:#fff; margin-bottom:4px;">Chave AI — Estratégia Completa</div>
+    <div class="text-secondary" style="margin-bottom:12px;">Curso completo + ferramenta de automação pra escalar teu perfil com IA como apoio estratégico</div>
+    <div class="upsell-price">R$497</div>
+    <div class="text-tertiary" style="margin-top:4px;">ou R$97/mês</div>
+    <div>
+      <div class="upsell-btn">Comenta CHAVE no Instagram</div>
+    </div>
+    <div class="text-tertiary" style="margin-top:12px; font-size:11px;">
+      Ou aplica pra Mentoria MCM (R$5.000) — 8 semanas com acompanhamento direto
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PÁGINA 12 — SOBRE O MATHEUS
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="label">Página 12</div>
+      <div style="font-size:20px; font-weight:800; margin-top:4px;">Sobre o Analista</div>
+    </div>
+    <div class="page-num">12 / 13</div>
+  </div>
+
+  <div class="glass-card" style="display:flex; gap:24px; align-items:flex-start; margin-bottom:20px;">
+    <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#0ea5e9,#2563eb); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:32px;">
+      MS
+    </div>
+    <div>
+      <div style="font-size:18px; font-weight:800; color:#fff;">Matheus Soares</div>
+      <div style="color:#0ea5e9; font-size:13px; font-weight:600; margin-bottom:8px;">@omatheus.ai</div>
+      <div class="text-secondary" style="line-height:1.6;">
+        Criador de conteúdo sobre IA e automação. Nordestino, autodidata, direto ao ponto.
+        Ensino a usar IA como apoio estratégico — não como atalho.
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:20px;">
+    <div class="metric-card" style="text-align:center;">
+      <div class="metric-big" style="color:#0ea5e9;">+50M</div>
+      <div class="text-secondary">Visualizações</div>
+    </div>
+    <div class="metric-card" style="text-align:center;">
+      <div class="metric-big">425k</div>
+      <div class="text-secondary">Seguidores Instagram</div>
+    </div>
+    <div class="metric-card" style="text-align:center;">
+      <div class="metric-big" style="color:#34d399;">32k</div>
+      <div class="text-secondary">Inscritos YouTube</div>
+    </div>
+  </div>
+
+  <div class="glass-card" style="text-align:center; padding:32px;">
+    <div class="label" style="margin-bottom:8px;">Dúvidas ou feedback?</div>
+    <div style="font-size:16px; font-weight:700; color:#fff; margin-bottom:4px;">Fala direto no Instagram</div>
+    <div style="color:#0ea5e9; font-size:20px; font-weight:800; margin-top:8px;">@omatheus.ai</div>
+    <div class="separator"></div>
+    <div class="text-tertiary" style="font-size:11px; line-height:1.8;">
+      DESTRAVE ACADEMY LTDA · Embu-Guaçu/SP<br>
+      Este relatório foi gerado com análise manual + IA como apoio estratégico.<br>
+      Todas as recomendações são baseadas nos dados reais do perfil @joaomarketing.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

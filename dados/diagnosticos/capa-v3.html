@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capa v3 — Diagnóstico @joaomarketing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #0a0a0f;
+    color: #ffffff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ─── CAPA ─────────────────────────────────── */
+  .cover {
+    width: 210mm;
+    height: 297mm;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0f;
+    display: flex;
+    flex-direction: column;
+    padding: 44px 40px 36px;
+  }
+
+  /* DOT GRID sutil */
+  .cover::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    z-index: 0;
+  }
+
+  /* ── ORBS DE COR ── */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 {
+    width: 360px; height: 320px;
+    top: -80px; left: -60px;
+    background: radial-gradient(circle, rgba(14,165,233,0.22) 0%, transparent 70%);
+    filter: blur(120px);
+  }
+  .orb-2 {
+    width: 300px; height: 300px;
+    top: 30%; right: -60px;
+    background: radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%);
+    filter: blur(150px);
+  }
+  .orb-3 {
+    width: 280px; height: 220px;
+    bottom: -40px; left: 20%;
+    background: radial-gradient(circle, rgba(6,182,212,0.13) 0%, transparent 70%);
+    filter: blur(100px);
+  }
+
+  /* Overlay gradiente suave de cima pra baixo */
+  .cover-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      rgba(14,165,233,0.04) 0%,
+      transparent 40%,
+      rgba(0,0,0,0.3) 100%
+    );
+    z-index: 0;
+  }
+
+  /* Tudo relativo ao z-index 1 */
+  .cover > * { position: relative; z-index: 1; }
+
+  /* ─── TOPO (20%) ─────────────────────────────── */
+  .cover-top {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 0 0 auto;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(14,165,233,0.12);
+    border: 1px solid rgba(14,165,233,0.28);
+    border-radius: 999px;
+    padding: 6px 16px;
+    width: fit-content;
+    box-shadow: 0 0 18px rgba(14,165,233,0.15);
+  }
+  .badge-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 8px rgba(52,211,153,0.8);
+  }
+  .badge-text {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: #7dd3fc;
+  }
+
+  .cover-title {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: #ffffff;
+    text-shadow: 0 0 60px rgba(14,165,233,0.3);
+  }
+
+  .cover-subtitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── MEIO (50%) — MÉTRICAS PROTAGONISTAS ─── */
+  .cover-metrics {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 28px 0;
+  }
+
+  .metric-card {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 28px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Glow suave nos cards */
+  .metric-card::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(14,165,233,0.5), transparent);
+  }
+
+  .metric-icon {
+    font-size: 24px;
+    color: #475569;
+    margin-bottom: 18px;
+    font-family: 'Material Symbols Outlined';
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+  }
+
+  .metric-num {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  .metric-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #475569;
+    margin-top: 12px;
+  }
+
+  /* Card de score com circle progress */
+  .metric-card-score {
+    position: relative;
+  }
+
+  .score-ring-wrap {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 14px;
+  }
+
+  .score-ring-wrap svg {
+    transform: rotate(-90deg);
+    width: 120px;
+    height: 120px;
+  }
+
+  .score-ring-num {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .score-ring-num .num {
+    display: block;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #f59e0b;
+  }
+
+  .score-ring-num .max {
+    display: block;
+    font-size: 11px;
+    color: #475569;
+    margin-top: 2px;
+  }
+
+  /* ─── RODAPÉ (30%) ─────────────────────────── */
+  .cover-bottom {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .client-section {
+    padding: 22px 0 20px;
+  }
+
+  .client-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .client-username {
+    font-size: 28px;
+    font-weight: 800;
+    color: #0ea5e9;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(14,165,233,0.4);
+  }
+
+  .client-info {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  .cover-sep {
+    height: 1px;
+    background: rgba(255,255,255,0.05);
+    margin: 0;
+  }
+
+  .cover-sig {
+    padding-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .sig-by {
+    font-size: 12px;
+    color: #334155;
+    font-weight: 500;
+  }
+
+  .sig-by strong {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .sig-date {
+    font-size: 11px;
+    color: #1e293b;
+    text-align: right;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <!-- Camadas de fundo -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="cover-overlay"></div>
+
+  <!-- ── TOPO (20%) ── -->
+  <div class="cover-top">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span class="badge-text">Diagnóstico de Perfil</span>
+    </div>
+    <div class="cover-title">Relatório de<br>Análise de Perfil</div>
+    <div class="cover-subtitle">Instagram &nbsp;·&nbsp; Análise Completa</div>
+  </div>
+
+  <!-- ── MEIO (50%) — MÉTRICAS PROTAGONISTAS ── -->
+  <div class="cover-metrics">
+
+    <!-- SEGUIDORES -->
+    <div class="metric-card">
+      <span class="metric-icon">groups</span>
+      <div class="metric-num" style="color:#ffffff;">15k</div>
+      <div class="metric-label">Seguidores</div>
+    </div>
+
+    <!-- ENGAJAMENTO -->
+    <div class="metric-card">
+      <span class="metric-icon">trending_up</span>
+      <div class="metric-num" style="color:#0ea5e9;">3.2%</div>
+      <div class="metric-label">Engajamento</div>
+    </div>
+
+    <!-- SCORE com circle progress (72/100 → amarelo) -->
+    <div class="metric-card metric-card-score">
+      <span class="metric-icon">speed</span>
+
+      <div class="score-ring-wrap">
+        <!-- r=54 → circunferência = 2π×54 ≈ 339.3
+             72% preenchido → dash = 339.3×0.72 = 244.3
+             offset = 339.3 - 244.3 = 95.0  -->
+        <svg viewBox="0 0 120 120">
+          <!-- trilha -->
+          <circle cx="60" cy="60" r="54"
+            fill="none"
+            stroke="rgba(255,255,255,0.07)"
+            stroke-width="8"/>
+          <!-- progresso amber (72/100) -->
+          <circle cx="60" cy="60" r="54"
+            fill="none"
+            stroke="#f59e0b"
+            stroke-width="8"
+            stroke-linecap="round"
+            stroke-dasharray="339.3"
+            stroke-dashoffset="95.0"/>
+        </svg>
+        <div class="score-ring-num">
+          <span class="num">72</span>
+          <span class="max">/100</span>
+        </div>
+      </div>
+
+      <div class="metric-label">Score Geral</div>
+    </div>
+
+  </div>
+
+  <!-- ── RODAPÉ (30%) ── -->
+  <div class="cover-bottom">
+    <div class="client-section">
+      <div class="client-label">Cliente</div>
+      <div class="client-username">@joaomarketing</div>
+      <div class="client-info">João Silva &nbsp;·&nbsp; Marketing Digital</div>
+    </div>
+
+    <div class="cover-sep"></div>
+
+    <div class="cover-sig">
+      <div class="sig-by">Por <strong>Matheus Soares</strong> · @omatheus.ai</div>
+      <div class="sig-date">
+        19 de março de 2026<br>
+        <span style="color:#1e293b;">Versão 3.0</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

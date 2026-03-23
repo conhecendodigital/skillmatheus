@@ -1,0 +1,30 @@
+# Dependências
+node_modules/
+package-lock.json
+
+# Logs e debug do Playwright MCP
+.playwright-mcp/
+
+# Screenshots e imagens geradas
+*.png
+*.jpg
+*.jpeg
+
+# PDFs gerados
+dados/diagnosticos/*.pdf
+
+# Repos clonados (são dependências externas)
+repos/
+agentesreposclaude-office-skills/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos sensíveis
+.env
+.env.local
+.credentials.json
+
+# DOCX gerados (manter só os .md)
+documentos/*.docx
